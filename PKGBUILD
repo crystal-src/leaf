@@ -1,36 +1,44 @@
 # Maintainer: DuckSoft <realducksoft at gmail dot com>
-pkgname=leaf-git
-pkgver=0.2.11.r13.g5b1582f
-pkgrel=2
+pkgname=leaf
+pkgver=0.2.13
+pkgrel=4
 pkgdesc="A lightweight and fast proxy utility tries to include any useful features."
-arch=(x86_64 aarch64)
+arch=('x86_64' 'aarch64')
 url="https://github.com/eycorsican/leaf"
 license=('custom:Apache-2.0')
-depends=(gcc-libs)
-makedepends=(git cargo)
-provides=(leaf)
-conflicts=(leaf)
-source=("${pkgname%-git}::git+$url")
-b2sums=(SKIP)
+depends=('gcc-libs')
+makedepends=('git' 'cargo')
+provides=('leaf')
+_lwip_commit="35708e6ec9964a54cefeb5fa96725a3ea535c289"
+source=("${pkgname}-${pkgver}::git+${url}.git#tag=v${pkgver}"
+    "lwip-leaf::git+https://github.com/eycorsican/lwip-leaf.git#commit=${_lwip_commit}"
+    "leaf@.service"
+    "leaf.sysusers")
 
-pkgver() {
-    cd "$srcdir"/"${pkgname%-git}"  
-    git describe --long --tags | sed 's/^v//;s/\([^-]*-g\)/r\1/;s/-/./g'
-}
+b2sums=('SKIP'
+        'SKIP'
+        '01e60395dc79c5c77b3b615fe7d65524fe39d7b5aaeba259f096233d0e71003a28344537c42a97110bd34b3681dce4f8a04f13cb44196ff3100f189a043701f7'
+        'a9d9c5373a474ccd4c82cd46b2a45b04a44cbe868c54358f2bf42547fc871efda47c4bcafac6b832bcae5ecd38e0c522e5d6435df3a20e2dcd3b6d250fd7d7ef')
 
 prepare() {
-    cd "$srcdir"/"${pkgname%-git}"
-    git submodule update --init --recursive
+    cd "${srcdir}/${pkgname}-${pkgver}"
+    git submodule init
+    git config submodule.lwip.url "${srcdir}/lwip-leaf"
+    git submodule update
 }
-    
+
 build() {
-	cd "$srcdir"/"${pkgname%-git}"
-	cargo +nightly build --release -p leaf-bin
+    cd "${srcdir}/${pkgname}-${pkgver}"
+    cargo build --release -p leaf-bin --target-dir=target
 }
 
 package() {
-	cd "$srcdir"/"${pkgname%-git}"
-	install -Dm644 LICENSE -t "$pkgdir"/usr/share/licenses/${pkgname%-git}/
-	install -Dm644 README{,.zh}.md -t "$pkgdir"/usr/share/doc/${pkgname%-git}/
-	install -Dm755 target/release/${pkgname%-git} -t "$pkgdir"/usr/bin/
+    cd "${srcdir}"
+    install -Dm644 leaf@.service -t "${pkgdir}/usr/lib/systemd/system/"
+    install -Dm644 leaf.sysusers "${pkgdir}/usr/lib/sysusers.d/leaf.conf"
+
+    cd "${srcdir}/${pkgname}-${pkgver}"
+    install -Dm644 LICENSE -t "${pkgdir}/usr/share/licenses/${pkgname}"
+    install -Dm644 README{,.zh}.md -t "${pkgdir}/usr/share/doc/${pkgname}/"
+    install -Dm755 "target/release/${pkgname}" -t "${pkgdir}/usr/bin/"
 }
