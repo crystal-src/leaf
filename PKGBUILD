@@ -1,7 +1,7 @@
 # Maintainer: DuckSoft <realducksoft at gmail dot com>
 pkgname=leaf
-pkgver=0.2.13
-pkgrel=4
+pkgver=0.6.0
+pkgrel=1
 pkgdesc="A lightweight and fast proxy utility tries to include any useful features."
 arch=('x86_64' 'aarch64')
 url="https://github.com/eycorsican/leaf"
@@ -9,7 +9,7 @@ license=('custom:Apache-2.0')
 depends=('gcc-libs')
 makedepends=('git' 'cargo')
 provides=('leaf')
-_lwip_commit="35708e6ec9964a54cefeb5fa96725a3ea535c289"
+_lwip_commit="12db774b78541b16d448ac58354d326536b79003"
 source=("${pkgname}-${pkgver}::git+${url}.git#tag=v${pkgver}"
     "lwip-leaf::git+https://github.com/eycorsican/lwip-leaf.git#commit=${_lwip_commit}"
     "leaf@.service"
